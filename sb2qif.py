@@ -45,6 +45,7 @@ __version__ = "0.8"
 
 class SkilleTegnFeil(Exception): pass
 class QIFFeil(Exception): pass
+class TolkeFeil(Exception): pass
 
 class qifskriver:
     transaksjonstyper = {'E':[], 'I':[]}
@@ -171,7 +172,7 @@ CR
         inntegnsett = "latin1"
         uttegnsett = "utf8"
         f = file(innfil)
-        topp = f.readline()
+        topp = f.readline() # skipping first line, as that is always a comment
         skilletegn = self._analyser_skilletegn(topp)
         for linje in f:
             #BOKF�INGSDATO";"RENTEDATO";"BRUKSDATO";"ARKIVREFERANSE";"TYPE";"TEKST";"UT FRA KONTO";"INN P�KON
@@ -181,6 +182,8 @@ CR
             #"BOKF�RINGSDATO"        "RENTEDATO"     "ARKIVREFERANSE"        "TYPE"  "TEKST" "UT FRA KONTO"  "INN P� KONTO"
             # "2007-03-31"    "2007-04-01"    "90010000"      "Kreditrente"   "KREDITRENTER"          7,01
 
+            if not linje.strip():
+                continue
             try:
                 if self.gammelformat:
                     bokdato, rentedato, bruksdato, ref, _type, tekst, ut, inn = \
@@ -188,9 +191,18 @@ CR
                 else:
                     bruksdato = "" # finnes ikke i nytt format
                     bokdato, rentedato, ref, _type, tekst, ut, inn = \
-                     linje.decode(inntegnsett).encode(uttegnsett).split(skilletegn)
-            except ValueError:
-                    raise TolkeFeil(linje) ## TODO NBNBN XXXX
+                     linje.decode(inntegnsett).encode(uttegnsett).split(skilletegn, 6)
+                    # strip out last separators, if they exists (weird enough)
+                    inn = inn.strip()
+                    if inn[-1] == skilletegn:
+                        inn = inn[:-1]
+            except ValueError, e:
+                print e
+                raise TolkeFeil(linje) ## TODO NBNBN XXXX
+            if rentedato == '"RENTEDATO"': # the presenter line to skip
+                continue
+            if not bokdato and not rentedato and not ref: # comment lines
+                continue
 
             d = {}
             d['aar'], d['mnd'], d['dag'] = self._strip(bokdato).split('-') # YYYY-MM-DD
