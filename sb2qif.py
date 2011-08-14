@@ -134,8 +134,10 @@ CR
 
 
     def _analyser_transaksjon(self, tr, inntekt):
-        if inntekt: y = "I"
-        else: y = "E"
+        if inntekt:
+            y = "I"
+        else: 
+            y = "E"
         if self.transaksjonstyper[y].count(tr): return
         self.transaksjonstyper[y].append(tr)
 
@@ -145,8 +147,10 @@ CR
         #"BOKF�RINGSDATO"        "RENTEDATO"     "ARKIVREFERANSE"        "TYPE"  "TEKST" "UT FRA KONTO"  "INN P� KONTO"
         for z in ('\t', ';', ','):
             p = len(linje.split(z))
-            if p not in (7, 8): continue
-            elif p == 7: return z
+            if p not in (7, 8):
+                continue
+            elif p == 7:
+                return z
             elif p == 8:
                 self.gammelformat = True
                 return z
@@ -168,6 +172,31 @@ CR
         except IndexError, AssertionError:
             return "xxxxxxxxxxxx", "2001"
     
+    def _split_line(self, linje, skilletegn):
+        """Splitt en csv-linje på riktig måte. Beskrivelser kan for eksempel
+        inneholde skilletegnet, så skilletegn mellom to " må ignoreres.
+        
+        Eksempel:
+
+            "2007-03-31"    "2007-04-01"    "90010000"      "hei, hallo"   "Varekjop"          7,01
+        """
+        ret = []
+        to_be_merged = None
+        for line in linje.split(skilletegn):
+            line = line.strip()
+            if to_be_merged is not None :
+                to_be_merged += line
+                # ikke stopp før en er på slutten av setningen, dvs "
+                if line[-1] == '"':
+                    ret.append(to_be_merged + line)
+                    to_be_merged = None
+            elif (not line or line[0] != '"' 
+                    or (line[0] == '"' and line[-1] == '"')):
+                ret.append(line)
+            else: # starter på ", men slutter ikke på " = ugyldig skilletegn
+                to_be_merged = line
+        return ret
+
     def _konv(self, innfil, utfil, modus='csv'):
         inntegnsett = "latin1"
         uttegnsett = "utf8"
@@ -181,28 +210,28 @@ CR
             #
             #"BOKF�RINGSDATO"        "RENTEDATO"     "ARKIVREFERANSE"        "TYPE"  "TEKST" "UT FRA KONTO"  "INN P� KONTO"
             # "2007-03-31"    "2007-04-01"    "90010000"      "Kreditrente"   "KREDITRENTER"          7,01
-
-            if not linje.strip():
+            linje = linje.strip()
+            if not linje or linje.startswith(',,,,'): # comments
                 continue
             try:
                 if self.gammelformat:
                     bokdato, rentedato, bruksdato, ref, _type, tekst, ut, inn = \
-                     linje.decode(inntegnsett).encode(uttegnsett).split(skilletegn)
+                     self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
                 else:
                     bruksdato = "" # finnes ikke i nytt format
-                    bokdato, rentedato, ref, _type, tekst, ut, inn = \
-                     linje.decode(inntegnsett).encode(uttegnsett).split(skilletegn, 6)
-                    # strip out last separators, if they exists (weird enough)
-                    inn = inn.strip()
-                    if inn[-1] == skilletegn:
-                        inn = inn[:-1]
+                    # Grrr, lines ends with separator
+                    bokdato, rentedato, ref, _type, tekst, ut, inn, junk = \
+                     self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
             except ValueError, e:
                 print e
                 raise TolkeFeil(linje) ## TODO NBNBN XXXX
-            if rentedato == '"RENTEDATO"': # the presenter line to skip
+            if rentedato == '"RENTEDATO"': # skip the presenter line
                 continue
-            if not bokdato and not rentedato and not ref: # comment lines
-                continue
+            inn = inn.strip()
+            # TODO: not sure if this is necessary any more:
+            if inn:
+                if inn[-1] == skilletegn:
+                    inn = inn[:-1]
 
             d = {}
             d['aar'], d['mnd'], d['dag'] = self._strip(bokdato).split('-') # YYYY-MM-DD
@@ -277,7 +306,7 @@ CR
             self._analyser_transaksjon(transaksjonstype, inntekt=bool(inn.strip()))
 
     def _id(self, dato, tekst):
-        # lag en unik id
+        """lag en unik id"""
         try:
             import hashlib # python2.5
             _id = hashlib.md5(tekst).hexdigest()
@@ -298,7 +327,7 @@ CR
         return s
 
     def _penger(self, p):
-        # bytt til engelsk desimaltegn etc
+        """Bytt til engelsk desimaltegn etc"""
         mx = re.match(r'^(\d+),(\d\d)$', p)
         try: p = "%s.%s" % (mx.group(1), mx.group(2))
         except AttributeError: pass
