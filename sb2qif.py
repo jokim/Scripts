@@ -183,16 +183,15 @@ CR
         ret = []
         to_be_merged = None
         for line in linje.split(skilletegn):
-            line = line.strip()
             if to_be_merged is not None :
                 to_be_merged += line
                 # ikke stopp før en er på slutten av setningen, dvs "
                 if line[-1] == '"':
-                    ret.append(to_be_merged + line)
+                    ret.append((to_be_merged + line).strip())
                     to_be_merged = None
             elif (not line or line[0] != '"' 
                     or (line[0] == '"' and line[-1] == '"')):
-                ret.append(line)
+                ret.append(line.strip())
             else: # starter på ", men slutter ikke på " = ugyldig skilletegn
                 to_be_merged = line
         return ret
@@ -230,10 +229,6 @@ CR
                     tekst       = detaljar[4]
                     ut          = detaljar[5]
                     inn         = detaljar[6]
-                    try:
-                        ut          = detaljar[7]
-                    except IndexError:
-                        ut = 0
                     #junk        = detaljar[8]
             except ValueError, e:
                 print e
@@ -241,10 +236,6 @@ CR
             if rentedato == '"RENTEDATO"': # skip the presenter line
                 continue
             inn = inn.strip()
-            # TODO: not sure if this is necessary any more:
-            if inn:
-                if inn[-1] == skilletegn:
-                    inn = inn[:-1]
 
             d = {}
             d['aar'], d['mnd'], d['dag'] = self._strip(bokdato).split('-') # YYYY-MM-DD
