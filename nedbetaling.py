@@ -29,9 +29,9 @@ def usage(exitcode=0):
 
     Example:
 
-    A 5% loan at 500 000,- split in 30 terms
+    A 5% loan at 500 000,- split in 12 terms for 30 years
 
-        nedbetaling.py 500000 0.05
+        nedbetaling.py 500000 0.05 30 12
     """
     sys.exit(exitcode)
 
