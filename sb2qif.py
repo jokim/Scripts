@@ -210,17 +210,31 @@ CR
             #
             #"BOKF�RINGSDATO"        "RENTEDATO"     "ARKIVREFERANSE"        "TYPE"  "TEKST" "UT FRA KONTO"  "INN P� KONTO"
             # "2007-03-31"    "2007-04-01"    "90010000"      "Kreditrente"   "KREDITRENTER"          7,01
-            if not linje.strip() or linje.strip().startswith(',,,,'): # comments
+            if not linje.strip() or linje.startswith(skilletegn+skilletegn+skilletegn+skilletegn):
                 continue
             try:
+                detaljar = self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
+                bokdato   = detaljar[0]
+                rentedato = detaljar[1]
                 if self.gammelformat:
-                    bokdato, rentedato, bruksdato, ref, _type, tekst, ut, inn = \
-                     self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
+                    bruksdato   = detaljar[2]
+                    ref         = detaljar[3]
+                    _type       = detaljar[4]
+                    tekst       = detaljar[5]
+                    ut          = detaljar[6]
+                    inn         = detaljar[7]
                 else:
                     bruksdato = "" # finnes ikke i nytt format
-                    # Grrr, lines ends with separator
-                    bokdato, rentedato, ref, _type, tekst, ut, inn = \
-                     self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
+                    ref         = detaljar[2]
+                    _type       = detaljar[3]
+                    tekst       = detaljar[4]
+                    ut          = detaljar[5]
+                    inn         = detaljar[6]
+                    try:
+                        ut          = detaljar[7]
+                    except IndexError:
+                        ut = 0
+                    #junk        = detaljar[8]
             except ValueError, e:
                 print e
                 raise TolkeFeil(linje) ## TODO NBNBN XXXX
