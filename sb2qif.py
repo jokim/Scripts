@@ -210,8 +210,7 @@ CR
             #
             #"BOKF�RINGSDATO"        "RENTEDATO"     "ARKIVREFERANSE"        "TYPE"  "TEKST" "UT FRA KONTO"  "INN P� KONTO"
             # "2007-03-31"    "2007-04-01"    "90010000"      "Kreditrente"   "KREDITRENTER"          7,01
-            linje = linje.strip()
-            if not linje or linje.startswith(',,,,'): # comments
+            if not linje.strip() or linje.strip().startswith(',,,,'): # comments
                 continue
             try:
                 if self.gammelformat:
@@ -220,7 +219,7 @@ CR
                 else:
                     bruksdato = "" # finnes ikke i nytt format
                     # Grrr, lines ends with separator
-                    bokdato, rentedato, ref, _type, tekst, ut, inn, junk = \
+                    bokdato, rentedato, ref, _type, tekst, ut, inn = \
                      self._split_line(linje.decode(inntegnsett).encode(uttegnsett), skilletegn)
             except ValueError, e:
                 print e
