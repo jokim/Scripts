@@ -231,7 +231,6 @@ CR
                     inn         = detaljar[6]
                     #junk        = detaljar[8]
             except ValueError, e:
-                print e
                 raise TolkeFeil(linje) ## TODO NBNBN XXXX
             if rentedato == '"RENTEDATO"': # skip the presenter line
                 continue
@@ -301,8 +300,10 @@ CR
             if len(kategori.strip()) == 0:
                 kategori = "Ukjent"
 
-            if ut: belop = self.utgiftFormat % self._penger(ut)
-            else: belop = self._penger(inn.strip())
+            if ut:
+                belop = self.utgiftFormat % self._penger(ut)
+            else:
+                belop = self._penger(inn.strip())
             utfil.write(self.transaksjonFormat % \
                 {'dato':dato, 'belop':belop, 'kategori':kategori, 
                  'referanse':self._strip(ref), 'tekst':self._strip(tekst), 
@@ -332,10 +333,13 @@ CR
 
     def _penger(self, p):
         """Bytt til engelsk desimaltegn etc"""
-        mx = re.match(r'^(\d+),(\d\d)$', p)
-        try: p = "%s.%s" % (mx.group(1), mx.group(2))
-        except AttributeError: pass
-        return p
+        if p.find('.') != -1:
+            return p
+        pos = p.find(',')
+        if pos != -1:
+            return "%s.%s" % (p[:pos], p[pos+1:])
+        # or else there is no separator
+        return "%s.%s" % (p[:-2], p[-2:])
 
 class cashbox(qifskriver):
     """Cashboxs qif-format, dekompilert av Christopher Campbell Jensen <Christopher@xxx.net>
