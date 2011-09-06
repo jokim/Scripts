@@ -178,7 +178,7 @@ CR
         
         Eksempel:
 
-            "2007-03-31"    "2007-04-01"    "90010000"      "hei, hallo"   "Varekjop"          7,01
+            "2007-03-31","2007-04-01","90010000","hei, hallo","Varekjop",7,01,
         """
         ret = []
         to_be_merged = None
@@ -234,7 +234,6 @@ CR
                 raise TolkeFeil(linje) ## TODO NBNBN XXXX
             if rentedato == '"RENTEDATO"': # skip the presenter line
                 continue
-            inn = inn.strip()
 
             d = {}
             d['aar'], d['mnd'], d['dag'] = self._strip(bokdato).split('-') # YYYY-MM-DD
@@ -255,8 +254,10 @@ CR
             if transaksjonstype.lower() in ('overførsel', 'overføring'): # er betalingsoverførsel
                 # se om det er verdig informasjon å bruke som betalingspart
                 # finn ut retning på overføringen
-                if ut: transaksjonstype += " ut"
-                else: transaksjonstype += " inn"
+                if ut:
+                    transaksjonstype += " ut"
+                else:
+                    transaksjonstype += " inn"
                 if 'mellom egne konti' in kategori.lower(): # egen overføring
                     kategori = "Intern overføring"
 
@@ -321,12 +322,17 @@ CR
 
     def _strip(self, s):
         s = s.strip()
-        if s[0] in ('"', "'"): s = s[1:]
-        if s[-1] in ('"', "'"): s = s[:-1]
-        if not s: return ""
+        if s[0] in ('"', "'"):
+            s = s[1:]
+        if s[-1] in ('"', "'"):
+            s = s[:-1]
+        if not s:
+            return ""
         if s[0] == "*":
-            try: s = s[1:]
-            except IndexError: return ""
+            try: 
+                s = s[1:]
+            except IndexError:
+                return ""
         s = s.replace(":", "-") # kmymoney skiller kategorier med kolon, så fjern dem
 
         return s
