@@ -32,24 +32,32 @@ def usage(exitcode = 0):
 def process_line(line):
     """Process a line in csv format and return it in the correct format."""
     # gnucash doesn't seem to like too much spaces
-    # TODO: fix this bad hack...
+    # TODO: this looks ugly, but it works, for now
     for i in range(20):
         line = line.replace('  ', ' ')
+    # remove weird characters
+    line = line.replace('\r', ' ')
+    line = line.replace('\t', ' ')
+    line = line.replace('\n', ' ')
+    line = line.replace('\0', ' ')
+
     values = line.strip().split(';')
 
     # the two last contains values, so commas should be replaced with points
     values[-2] = values[-2].replace(',', '.')
     values[-1] = values[-1].replace(',', '.')
-    print ';'.join(values)
+    out = u';'.join(values)
+    print out.encode('utf-8')
 
 def process_file(filename):
     f = open(filename, 'r')
-    line = f.readline()
+    line = unicode(f.readline(), 'iso-8859-1')
     if not line.startswith('Dato'):
         # skipping the first line if it's the value names
         process_line(line)
     for line in f:
         if line.strip():
+            line = unicode(line, 'iso-8859-1')
             process_line(line)
 
 def main(argv):
