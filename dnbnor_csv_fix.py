@@ -29,9 +29,28 @@ def usage(exitcode = 0):
     for GnuCash."""
     sys.exit(exitcode)
 
+def process_line(line):
+    """Process a line in csv format and return it in the correct format."""
+    # gnucash doesn't seem to like too much spaces
+    # TODO: fix this bad hack...
+    for i in range(20):
+        line = line.replace('  ', ' ')
+    values = line.strip().split(';')
+
+    # the two last contains values, so commas should be replaced with points
+    values[-2] = values[-2].replace(',', '.')
+    values[-1] = values[-1].replace(',', '.')
+    print ';'.join(values)
+
 def process_file(filename):
-
-
+    f = open(filename, 'r')
+    line = f.readline()
+    if not line.startswith('Dato'):
+        # skipping the first line if it's the value names
+        process_line(line)
+    for line in f:
+        if line.strip():
+            process_line(line)
 
 def main(argv):
     if len(argv) <= 1:
