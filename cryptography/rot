@@ -1,0 +1,25 @@
+#!/bin/env python
+# -*- encoding: utf8 -*-
+# Copyright Joakim Hovlandsvåg
+# Licenced by GPLv3.
+
+import sys
+
+def rotate(input, rot=13):
+    """Rotate text by standard rot13."""
+    ret = ''
+    for s in input:
+        ret += chr(65 + ((ord(s) - 65 + rot) % 26))
+    return ret
+
+if __name__ == '__main__':
+    if len(sys.argv) <= 1:
+        print "Usage: rot <input-data to rotate>"
+        sys.exit(1)
+    for i in range(29):
+        for a in sys.argv[1:]:
+            sys.stdout.write(rotate(a, i))
+            sys.stdout.write(' ')
+        sys.stdout.write('\n')
+
+
