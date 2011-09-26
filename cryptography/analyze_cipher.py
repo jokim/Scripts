@@ -22,7 +22,7 @@ if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print "Usage: analyze <input-data to analyze>"
         sys.exit(1)
-    counts = count_chars(' '.join(sys.argv[1:]))
+    counts = count_chars(' '.join(unicode(a, 'utf8') for a in sys.argv[1:]))
     for c in sorted(counts):
         print "%3s : %d" % (c, counts[c])
 
