@@ -57,7 +57,19 @@ if __name__ == '__main__':
         sys.exit(1)
 
     cipher = ' '.join(args)
+
+    has_allmatch = cipher.find('*') != -1
+
     for sub in subs:
         cipher = cipher.replace(sub, subs[sub])
+    # Special match for setting unchanged ciphers to a default value
+    # We have to assume that the substituted keys aren't present in the
+    # ciphertext, to make things simple for now
+    if subs.has_key('*') and not has_allmatch:
+        changed = subs.values()
+        for i in range(len(cipher)):
+            if cipher[i] not in changed:
+                print "not in"
+                cipher = cipher.replace(cipher[i], subs['*'])
     print cipher
 
