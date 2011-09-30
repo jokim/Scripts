@@ -58,9 +58,6 @@ if __name__ == '__main__':
 
     cipher = ' '.join(args)
     for sub in subs:
-        print cipher
-        print "sub: %s -> %s" % (sub, subs[sub])
         cipher = cipher.replace(sub, subs[sub])
-        print cipher
     print cipher
 
