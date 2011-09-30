@@ -248,8 +248,10 @@ CR
             betx = re.match(r'^([A-Z ]+)?(FRA|TIL)-\ (.+)(BETNR-\ \d+)?$', kategori)
             if betx:
                 kategori = betx.group(3)
-                try: kategori = re.match(r'(.+) BETNR-\ \d+$', kategori).group(1)
-                except AttributeError: pass
+                try:
+                    kategori = re.match(r'(.+) BETNR-\ \d+$', kategori).group(1)
+                except AttributeError:
+                    pass
 
             if transaksjonstype.lower() in ('overførsel', 'overføring'): # er betalingsoverførsel
                 # se om det er verdig informasjon å bruke som betalingspart
@@ -392,5 +394,4 @@ if __name__ == '__main__':
         qiffer = qifskriver
     konv = qiffer(sys.argv[1:])
     konv.konverter()
-
 
