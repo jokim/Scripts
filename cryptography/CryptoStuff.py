@@ -114,3 +114,10 @@ def chunk_split(data, size):
         chunk = data[i*size:i*size+size]
         ret.append(chunk)
     return ret
+
+
+def vigenere_decrypt(cipher, key):
+    """Decrypt a Vigenere ciphertext with the given key."""
+    for chunk in chunk_split(cipher, len(key)):
+        # TODO!
+        return "NotImplementedYet"
