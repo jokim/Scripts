@@ -137,6 +137,22 @@ def kasiski(input):
         size -= 1
     return deltas
 
+def index_of_coincidence(input):
+    """Calculate the index of coincidence out of a string, which is the
+    probability that two random elements in the string are identical.
+
+    English language (characters only) has an index of about 0.065, while a
+    completely random string has an index of 0.038. This can be used to figure
+    out if some ciphertext is getting closer to plaintext, e.g. when splitting
+    up Vigenère cipher into different keylengths."""
+    index = 0
+    for (char, counts) in count_chars(input).iteritems():
+        n = len(input)
+        freq = float(counts) / n
+        # TODO: this is wrong calculation...
+        index += freq * (freq - 1) / (n*(n-1))
+    return index
+
 def gcd(a,b):
     """Finding the greatest common divisor between two integers"""
     while b: 
@@ -176,3 +192,8 @@ if __name__ == '__main__':
     print "Kasiski:"
     keylengths = kasiski(cipher.replace(' ', ''))
     print "Possible key lengths: %s" % ', '.join(str(k) for k in keylengths)
+
+    print "index: %f" % index_of_coincidence(cipher.replace(' ', ''))
+
+
+
