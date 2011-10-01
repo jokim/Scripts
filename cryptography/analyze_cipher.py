@@ -208,10 +208,15 @@ if __name__ == '__main__':
 
     print "Possible key lengths (kasiski):"
     print "(The English language's coincidence index is around 0.065)"
+    best_length = 0
+    goal = 0.065
     for keylength in kasiski(cipher):
-        idx = (index_of_coincidence(chunk) for chunk 
-                                              in chunk_split(cipher, keylength))
-        print "Length %6d : %s" % (keylength, ', '.join("%.3f" % i for i in idx))
-        print 
+        idx = [index_of_coincidence(chunk) for chunk 
+                                              in chunk_split(cipher, keylength)]
+        median = sorted(idx)[len(idx) / 2]
+        if abs(goal - best_length) > abs(goal - median):
+            best_length = keylength
+        print "Length %6d : %.4f" % (keylength, median)
 
+    print "\nBest found keylength: %d" % best_length
 
