@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf8 -*-
+# -*- encoding: utf-8 -*-
 # Copyright Joakim Hovlandsvåg
 # Licenced by GPLv3.
 """
@@ -146,6 +146,8 @@ def index_of_coincidence(input):
     out if some ciphertext is getting closer to plaintext, e.g. when splitting
     up Vigenère cipher into different keylengths."""
     index = 0
+    if len(input) <= 1: # TODO: what is correct to return when not enough data?
+        return -1
     for (char, counts) in count_chars(input).iteritems():
         n = float(len(input))
         index += counts * (counts - 1) / (n*(n-1))
@@ -156,6 +158,20 @@ def gcd(a,b):
     while b: 
         a, b = b, a%b
     return a
+
+def chunk_split(data, size):
+    """Split some array like object into chunks of the given size. The last
+    chunk might be smaller than the size if len(data) % size != 0."""
+    # TODO: aren't there a smarter way of doing this? There's probably some
+    # functionality for it in python, just have to find it.
+    ret = []
+    rounds = len(data) / size
+    if len(data) % size:
+        rounds += 1
+    for i in range(rounds):
+        chunk = data[i*size:i*size+size]
+        ret.append(chunk)
+    return ret
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
@@ -175,11 +191,14 @@ if __name__ == '__main__':
     counts = count_chars(cipher)
     print "    Char Occur    Percent"
     for c in sorted(counts, key=lambda a: counts[a], reverse=True):
-        print "%5s : %5d    %1.4f" % (c, counts[c], float(counts[c])/len(cipher))
+        print u"%5s : %5d    %1.4f" % (c, counts[c], float(counts[c])/len(cipher))
     print "Total    %5d" % len(cipher)
 
+    # No need of the spaces from here
+    cipher = cipher.replace(' ', '')
+
     print "\nBigrams:"
-    bigrams = count_bigrams(cipher.replace(' ', ''))
+    bigrams = count_bigrams(cipher)
     for bi in sorted(bigrams, key=lambda a: bigrams[a], reverse=True):
         if bigrams[bi] <= 1: # drop single ones, they're not interesting
             break
@@ -187,11 +206,12 @@ if __name__ == '__main__':
 
     print
 
-    print "Kasiski:"
-    keylengths = kasiski(cipher.replace(' ', ''))
-    print "Possible key lengths: %s" % ', '.join(str(k) for k in keylengths)
-
-    print "index: %f" % index_of_coincidence(cipher.replace(' ', ''))
-
+    print "Possible key lengths (kasiski):"
+    print "(The English language's coincidence index is around 0.065)"
+    for keylength in kasiski(cipher):
+        idx = (index_of_coincidence(chunk) for chunk 
+                                              in chunk_split(cipher, keylength))
+        print "Length %6d : %s" % (keylength, ', '.join("%.3f" % i for i in idx))
+        print 
 
 
