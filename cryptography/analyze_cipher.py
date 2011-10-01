@@ -147,9 +147,8 @@ def index_of_coincidence(input):
     up Vigenère cipher into different keylengths."""
     index = 0
     for (char, counts) in count_chars(input).iteritems():
-        n = len(input)
-        freq = float(counts) / n
-        # TODO: this is wrong calculation...
+        n = float(len(input))
+        freq = float(counts)# / n
         index += freq * (freq - 1) / (n*(n-1))
     return index
 
