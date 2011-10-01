@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 
-                '', ['key='])
+                '', ['key=', 'keylength='])
     except getopt.GetoptError, e:
         print e
         usage(1)
@@ -29,10 +29,14 @@ if __name__ == '__main__':
         print "Need ciphertext as input"
         usage(1)
 
-    key = None
+    key = chosen_keylength = None
+    
     for opt, arg in opts:
         if opt == '--key':
             key = arg
+        elif opt == '--keylength':
+            chosen_keylength = int(arg)
+
 
     cipher = ''.join(unicode(a, 'utf8') for a in args)
 
@@ -51,7 +55,12 @@ if __name__ == '__main__':
                 best_length = keylength
             print "Length %6d : %.4f" % (keylength, median)
 
-        print "\nBest found keylength: %d" % best_length
+        if not chosen_keylength:
+            keylength = best_length
+            print "\nBest found keylength: %d" % best_length
+        else:
+            keylength = chosen_keylength 
+            print "\nKeylength chosen to: %d" % chosen_keylength
 
         # TODO: 
 
