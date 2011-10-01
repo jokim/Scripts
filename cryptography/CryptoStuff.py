@@ -116,8 +116,18 @@ def chunk_split(data, size):
     return ret
 
 
-def vigenere_decrypt(cipher, key):
-    """Decrypt a Vigenere ciphertext with the given key."""
-    for chunk in chunk_split(cipher, len(key)):
-        # TODO!
-        return "NotImplementedYet"
+def vigenere_decrypt(cipher, key, keyspace=26):
+    """Decrypt a Vigenere ciphertext with the given key.
+
+    Vigenere is encrypted by:
+     e(x1, ..., xm) = (x1 + k1 mod 26, ..., xm + km mod 26)
+
+    where m is the length of the key, and 26 should be the character space.
+    Decryption is then:
+
+     d(y1, ..., ym) = (y1 - k1 mod 26, ..., ym - km mod 26)
+    """
+    ret = []
+    for i in range(len(cipher)):
+        ret.append(chr(ord(cipher[i]) + ord(key[i%len(key)]) % keyspace))
+    return ''.join(ret)
