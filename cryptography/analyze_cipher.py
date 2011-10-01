@@ -83,6 +83,66 @@ def count_bigrams(input):
         bigrams.setdefault(bigram, 0)
         bigrams[bigram] += 1
 
+def count_grams(input, length=3):
+    """Count the number of repetitions of sequences in the ciphertext."""
+    grams = {}
+    i = 0
+    while True:
+        try:
+            seq = input[i]
+            for j in range(1, length):
+                seq += input[i + j]
+        except IndexError:
+            return grams
+        grams.setdefault(seq, 0)
+        grams[seq] += 1
+        i += 1
+    return grams
+
+def kasiski(input):
+    """Do the kasiski test on a given ciphertext, that is, find repeating
+    sequences and get the greated common divisor (gcd) between them. Used for
+    finding the key length of different cryptosystems, e.g. Vigenère.
+    
+    The return is a list of all valid deltas, that is, possible key lengths."""
+    deltas = set()
+
+    # Starting high, trying to find larger sequences first
+    size = len(input) / 3
+    while size >= 3:
+        seqs = count_grams(input, length=size)
+        for seq in sorted(seqs, key=lambda a: int(seqs[a]), reverse=True):
+            # TODO: why doesn't this sort correctly?
+
+            if seqs[seq] <= 2:
+                # TODO: ignore those with only two occurences as well?
+                continue
+            #print seq, seqs[seq]
+
+            # find sequence' positions
+            # find gcd of sequence
+            poss = []
+            pos = -1
+            try:
+                while True:
+                    pos = input.index(seq, pos + 1)
+                    poss.append(pos)
+            except ValueError:
+                pass
+            # find gcd between first pos and the rest
+            divisor = poss[1] - poss[0]
+            for pos in range(2, len(poss)):
+                divisor = gcd(divisor, poss[pos] - poss[0])
+            deltas.add(divisor)
+        size -= 1
+    return deltas
+
+def gcd(a,b):
+    """Finding the greatest common divisor between two integers"""
+    while b: 
+        a, b = b, a%b
+    return a
+
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print "Usage: analyze <input-data to analyze>"
@@ -111,4 +171,8 @@ if __name__ == '__main__':
             break
         print "%5s : %5d" % (bi, bigrams[bi])
 
+    print
 
+    print "Kasiski:"
+    keylengths = kasiski(cipher.replace(' ', ''))
+    print "Possible key lengths: %s" % ', '.join(str(k) for k in keylengths)
