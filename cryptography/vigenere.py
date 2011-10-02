@@ -62,6 +62,6 @@ if __name__ == '__main__':
             keylength = chosen_keylength 
             print "\nKeylength chosen to: %d" % chosen_keylength
 
-        # TODO: 
+        # TODO: find best values for the chars in the key
 
 
