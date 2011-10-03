@@ -63,5 +63,6 @@ if __name__ == '__main__':
             print "\nKeylength chosen to: %d" % chosen_keylength
 
         # TODO: find best values for the chars in the key
-
-
+        print "Guessing at key: %s" % (
+            CryptoStuff.vigenere_findkey_by_ioc(cipher, keylength,
+                                               CryptoStuff.probabilities['no']))

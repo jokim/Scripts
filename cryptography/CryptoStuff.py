@@ -115,6 +115,29 @@ def chunk_split(data, size):
         ret.append(chunk)
     return ret
 
+def column_split(data, length):
+    """Split data into elements of given length. The elements are split by
+    columns. Example of data with length 5:
+
+    data =  x0  x1  x2  x3  x4
+            x5  x6  x7  x8  x9
+            x10 x11 x12 x13 x14
+
+            ||  ||  ||  ||  ||
+
+            y0  y1  y2  y3  y4"""
+    columns_len = len(data) / length
+    for i in range(length):
+        round = []
+        for j in range(columns_len):
+            try:
+                round.append(data[i + j*length])
+            except IndexError:
+                print "broke at i,j"
+                break
+        yield round
+    # last round
+    yield round
 
 def vigenere_decrypt(cipher, key, keyspace=26):
     """Decrypt a Vigenere ciphertext with the given key.
@@ -130,4 +153,72 @@ def vigenere_decrypt(cipher, key, keyspace=26):
     ret = []
     for i in range(len(cipher)):
         ret.append(chr(ord(cipher[i]) + ord(key[i%len(key)]) % keyspace))
+        # TODO: should append the start of the keyspace, or just return ints and
+        # reformat it at output instead - would be easier, i think...
     return ''.join(ret)
+
+# The probabilities of characters in some languages
+probabilities = {
+    'no': {
+        u'a': 6.1,
+        u'b': 1.5,
+        u'c': 0.2,
+        u'd': 4.3,
+        u'e': 15.2,
+        u'f': 2.0,
+        u'g': 3.8,
+        u'h': 1.6,
+        u'i': 6.2,
+        u'j': 1.0,
+        u'k': 3.8,
+        u'l': 5.4,
+        u'm': 3.3,
+        u'n': 8.1,
+        u'o': 4.9,
+        u'p': 1.9,
+        u'q': 0.004,
+        u'r': 8.6,
+        u's': 6.7,
+        u't': 7.9,
+        u'u': 1.6,
+        u'v': 2.5,
+        u'w': 0.1,
+        u'x': 0.03,
+        u'y': 0.7,
+        u'z': 0.03,
+        u'æ': 0.2,
+        u'ø': 0.9,
+        u'å': 1.5,
+        },
+    }
+
+def vigenere_findkey_by_ioc(cipher, keylength, alphabet, target_ioc=0.065):
+    """Try to find a proper key by using the index of coincidence over the
+    ciphertext.
+
+    The given alphabet must be on the form: {'key': probability, ...}
+    """
+    key = ''
+    partsize = len(cipher) / keylength
+    sorted_alph = sorted(alphabet)
+
+    for column in column_split(cipher, keylength):
+        count = count_chars(column)
+        count = dict((c.lower(), count[c]) for c in count)
+        best_key = ('_', 9999)
+        for g in range(len(alphabet)):
+            idx = 0
+            for i in range(len(alphabet)):
+                #print "%3d: %s (%s)   %2.3f * %2.3f" % (i, sorted_alph[i], sorted_alph[(i+g)%len(alphabet)],
+                #                              alphabet[sorted_alph[i]],
+                #                              count.get(sorted_alph[(i+g)%len(alphabet)], 0.0)
+                #                              )
+                idx += (alphabet[sorted_alph[i]] 
+                        * count.get(sorted_alph[(i+g) % len(alphabet)], 0.0))
+            if abs(target_ioc - best_key[1]) > abs(target_ioc - idx):
+                best_key = (sorted_alph[g], idx)
+        print best_key
+        key += best_key[0]
+    return key
+
+
