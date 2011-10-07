@@ -40,6 +40,8 @@ def process_line(line):
     line = line.replace('\t', ' ')
     line = line.replace('\n', ' ')
     line = line.replace('\0', ' ')
+    line = line.replace('&amp;', '&')
+    line = line.replace('  ', ' ')
 
     values = line.strip().split(';')
 
