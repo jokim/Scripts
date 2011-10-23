@@ -6,7 +6,6 @@
 Script for handling affine cipher cryptosystems.
 """
 import sys
-
 import CryptoStuff
 
 # TODO: handle input better, if more functionality is needed

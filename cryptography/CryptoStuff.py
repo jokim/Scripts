@@ -184,15 +184,43 @@ def affine_decrypt(cipher, a, b, modulo=26):
         #print "cipher:%s = %s -> %s (%s)" % (c, cipher, plain, chr(plain+65))
 
         if plain == 26:
-            out = u'Æ'
+            out = u'æ'
         elif plain == 27:
-            out = u'Ø'
+            out = u'ø'
         elif plain == 28:
-            out = u'Å'
+            out = u'å'
         else:
-            out = chr(plain + 65)
+            out = chr(plain + 97)
         ret += out
     return ret
+
+def equation_solver(matrix, modulo=26):
+    """Solve an equation in modulo. The given matrix must be on the form
+        ((a, b, y),
+         ...
+         (a, b, y))
+    for equations on the form (xa + b) % modulo = y, e.g. 4a + b % 26 = 11.
+    Returns valid results for a and b.
+    
+    This is usable for affine cipher solving."""
+    ret = []
+    for a in range(modulo):
+        # get b from first equation
+        # TODO: assumes here that matrix[0][1] == 1
+        b = (matrix[0][2] - a*matrix[0][0]) # TODO: modulo?
+
+        correct = False
+        for eq in matrix:
+            if (a*eq[0] + b*eq[1]) % modulo == eq[2]:
+                correct = True
+            else:
+                correct = False
+                break
+        if correct:
+            ret.append((a,b))
+    print ret
+    return ret
+
 
 # The probabilities of characters in some languages
 probabilities = {
