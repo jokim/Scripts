@@ -157,6 +157,43 @@ def vigenere_decrypt(cipher, key, keyspace=26):
         # reformat it at output instead - would be easier, i think...
     return ''.join(ret)
 
+def multiplicative_inverse(x, keyspace=26):
+    """Find the multiplicative inverse x·¹ so that x * x·¹ == 1, if such a
+    variable exists in the given keyspace."""
+    # TODO: this is a quite slow process for finding it, trying every possible
+    # variable in the keyspace. It will be especially slow if the keyspace is
+    # large...
+    for i in range(keyspace):
+        if (i * x) % keyspace == 1:
+            return i
+
+def affine_decrypt(cipher, a, b, modulo=26):
+    """Decrypt an affine encrypted ciphertext with the given key."""
+    ret = ''
+    ainv = multiplicative_inverse(a, modulo)
+    for c in cipher:
+        cipher = ord(c) - 65
+        # TODO: this is not generic, only works for norwegian characters...
+        if c == u'Æ': 
+            cipher = 26
+        elif c == u'Ø':
+            cipher = 27
+        elif c == u'Å':
+            cipher = 28
+        plain = (ainv*(cipher - b)) % modulo
+        #print "cipher:%s = %s -> %s (%s)" % (c, cipher, plain, chr(plain+65))
+
+        if plain == 26:
+            out = u'Æ'
+        elif plain == 27:
+            out = u'Ø'
+        elif plain == 28:
+            out = u'Å'
+        else:
+            out = chr(plain + 65)
+        ret += out
+    return ret
+
 # The probabilities of characters in some languages
 probabilities = {
     'no': {
