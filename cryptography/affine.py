@@ -10,7 +10,7 @@ import CryptoStuff
 
 # TODO: handle input better, if more functionality is needed
 if __name__ == '__main__':
-    if len(sys.argv) <= 4:
+    if len(sys.argv) <= 3:
         print "Usage: affine.py a b <input-data to analyze>"
         sys.exit(1)
     a = int(sys.argv[1])

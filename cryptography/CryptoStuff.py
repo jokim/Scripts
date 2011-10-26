@@ -202,12 +202,13 @@ def equation_solver(matrix, modulo=26):
     for equations on the form (xa + b) % modulo = y, e.g. 4a + b % 26 = 11.
     Returns valid results for a and b.
     
-    This is usable for affine cipher solving."""
+    This is usable e.g. for affine cipher solving."""
     ret = []
     for a in range(modulo):
         # get b from first equation
-        # TODO: assumes here that matrix[0][1] == 1
-        b = (matrix[0][2] - a*matrix[0][0]) # TODO: modulo?
+        # TODO: assumes here that matrix[0][1] == 1, should be fixed for other
+        # cryptosystems than affine ciphers
+        b = (matrix[0][2] - a*matrix[0][0]) % modulo
 
         correct = False
         for eq in matrix:
