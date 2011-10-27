@@ -248,6 +248,7 @@ def lfsr_keystream(startkey, constants):
     # TODO: could remove old z, as last round is used. Now we quickly use up all
     # the memory.
 
+
 # The probabilities of characters in some languages
 probabilities = {
     'no': {
