@@ -3,6 +3,17 @@
 """Small script just for fixing task 3 in oblig, UNIK4220.  """
 import CryptoStuff
 
+def xor(a, b):
+    """XOR a list with another list. b can be a generator, like a keystream."""
+    bi = iter(b)
+    for i in range(len(a)):
+        yield int(a[i]) ^ int(bi.next())
+
+def decode(cipher, alfabet):
+    """Return a stream of decoded variables from the given alfabet."""
+    for c in cipher:
+        yield alfabet[c]
+
 print "Oppgave 3b)\n"
 
 # Encoding of characters to given code values in oblig.
@@ -50,12 +61,10 @@ cipher = u'NQFTRQBNCJK,ØDXDUVZØ,EAQDX'
 binary_cipher = ''.join(encoding[s] for s in cipher)
 print "Coded input: %s" % binary_cipher
 
-plain_coded = list()
-for c in binary_cipher:
-    c = int(c)
-    z = keystream.next()
-    keys += str(z)
-    plain_coded.append(z ^ c)
+for i in range(len(binary_cipher)):
+    keys += str(keystream.next())
+
+plain_coded = tuple(xor(binary_cipher, keys))
 print "Keystream used: %s" % keys
 print "Coded output: %s" % ''.join(str(p) for p in plain_coded)
 
@@ -115,9 +124,37 @@ possibilities = (
         '00100000',
         )
 
+def int2bin(i, length):
+    """Take an int and return a string consisting of 0s and 1s, as the binary
+    format of the int. If the string is shorter than length, 0s are added before
+    it."""
+    b = bin(i)[2:]
+    for i in range(length - len(b)):
+        b = '0' + b
+    return b
+
+def group_by(input, elements):
+    """Group a number of elements into one element. Usable e.g. for grouping
+    streams from 0100010101010 -> 01000 10101 01010."""
+    it = iter(input)
+    while True:
+        ret = ''
+        for i in range(elements):
+            ret += str(it.next())
+        yield ret
+
+
 
 key = (1, 0, 1, 1, 0, 0, 1, 0) 
-for i in range(len(possibilities)):
-    keystream = CryptoStuff.lfsr_keystream(key,
-                                possibilities[i])
+for i in range(2**8 - 1):
+    #print i, possibilities[i], ':'
+    keystream = CryptoStuff.lfsr_keystream(key, int2bin(i, 8))
+    plain = xor(binary_cipher, keystream)
+    plain = group_by(plain, 5)
+    plain = tuple(plain)
+    if (plain[0] != encoding['H'] or plain[1] != encoding['E'] 
+            or plain[2] != encoding['I']):
+        continue
 
+    plaintext = u''.join(d for d in decode(plain, decoding))
+    print plaintext

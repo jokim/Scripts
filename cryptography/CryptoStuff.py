@@ -239,7 +239,7 @@ def lfsr_keystream(startkey, constants):
     while True:
         z.append(0)
         for j in range(len(constants)):
-            if not constants[j]:
+            if not int(constants[j]):
                 continue
             z[i+length] += z[i+j]
         z[i+length] = z[i+length] % 2
