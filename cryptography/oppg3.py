@@ -153,8 +153,8 @@ for i in range(2**8 - 1):
     plain = group_by(plain, 5)
     plain = tuple(plain)
     if (plain[0] != encoding['H'] or plain[1] != encoding['E'] 
-            or plain[2] != encoding['I']):
+            or plain[2] != encoding['I'] or plain[3] != encoding[',']):
         continue
-
     plaintext = u''.join(d for d in decode(plain, decoding))
+    print int2bin(i, 8)
     print plaintext
