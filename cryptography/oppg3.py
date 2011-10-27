@@ -3,6 +3,8 @@
 """Small script just for fixing task 3 in oblig, UNIK4220.  """
 import CryptoStuff
 
+print "Oppgave 3b)\n"
+
 # Encoding of characters to given code values in oblig.
 encoding = {
         u'A': u'00000',
@@ -42,6 +44,7 @@ decoding = dict((encoding[k], k) for k in encoding)
 
 keystream = CryptoStuff.lfsr_keystream((0,1,0,1,0,1,0,1),
                                        (1,1,0,0,0,1,1,0))
+keys = ''
 
 cipher = u'NQFTRQBNCJK,ØDXDUVZØ,EAQDX'
 binary_cipher = ''.join(encoding[s] for s in cipher)
@@ -51,20 +54,70 @@ plain_coded = list()
 for c in binary_cipher:
     c = int(c)
     z = keystream.next()
+    keys += str(z)
     plain_coded.append(z ^ c)
+print "Keystream used: %s" % keys
 print "Coded output: %s" % ''.join(str(p) for p in plain_coded)
 
 plain = ''
 for i in range(len(plain_coded) / 5):
     ret = ''.join(str(p) for p in plain_coded[i*5:i*5+5])
-    print "plplpl: %s" % ret
     plain += decoding[ret]
 print "Plain: %s" %plain
 
+print "\nOppgave 3c)\n"
+
+cipher = u'RPPSTTOXPVFMAVØD,UÅÅPLYWUQÆLZFÅJVÅS UN.ODH'
+binary_cipher = ''.join(encoding[s] for s in cipher)
+print "Coded input: %s" % binary_cipher
+
+hei = ''.join(encoding[s] for s in 'HEI,')
+print "Hei: %s" % hei
+initkey = ''
+for i in range(len(hei)):
+    initkey += str(int(hei[i]) ^ int(binary_cipher[i]))
+print "Initial key: %s" % initkey
+    
+print "Brute force:"
+possibilities = (
+        '00000000',
+        '00000001',
+        '00000010',
+        '00000011',
+        '00000100',
+        '00000101',
+        '00000110',
+        '00000111',
+        '00001000',
+        '00001001',
+        '00001010',
+        '00001011',
+        '00001100',
+        '00001101',
+        '00001110',
+        '00001111',
+        '00010000',
+        '00010001',
+        '00010010',
+        '00010011',
+        '00010100',
+        '00010101',
+        '00010110',
+        '00010111',
+        '00011000',
+        '00011001',
+        '00011010',
+        '00011011',
+        '00011100',
+        '00011101',
+        '00011110',
+        '00011111',
+        '00100000',
+        )
 
 
-
-
-
-
+key = (1, 0, 1, 1, 0, 0, 1, 0) 
+for i in range(len(possibilities)):
+    keystream = CryptoStuff.lfsr_keystream(key,
+                                possibilities[i])
 
