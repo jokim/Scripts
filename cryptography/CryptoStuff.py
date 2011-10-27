@@ -222,6 +222,31 @@ def equation_solver(matrix, modulo=26):
     print ret
     return ret
 
+def lfsr_keystream(startkey, constants):
+    """Create a Linear Feedback Shift Register keystream out of a given startkey
+    and constants. All is considered binary, but for ease of code, and not much
+    time to do this, the input in startkey and constants has to be bytes of 1
+    and 0."""
+    length = len(startkey)
+    assert length == len(constants)
+    # first return initial key
+    z = list()
+    for key in startkey:
+        yield key
+        z.append(key)
+    # then use the constants for following rounds
+    i = 0
+    while True:
+        z.append(0)
+        for j in range(len(constants)):
+            if not constants[j]:
+                continue
+            z[i+length] += z[i+j]
+        z[i+length] = z[i+length] % 2
+        yield z[i+length]
+        i += 1
+    # TODO: could remove old z, as last round is used. Now we quickly use up all
+    # the memory.
 
 # The probabilities of characters in some languages
 probabilities = {
