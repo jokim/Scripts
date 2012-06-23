@@ -27,6 +27,22 @@ Example:
 """
 import sys
 import os
+import re
+
+monthstr2num = {
+        'jan': 1,
+        'feb': 2,
+        'mar': 3,
+        'apr': 4,
+        'mai': 5,
+        'jun': 6,
+        'jul': 7,
+        'aug': 8,
+        'sep': 9,
+        'okt': 10,
+        'nov': 11,
+        'des': 12,
+        }
 
 def usage(exitcode = 0):
     print """Usage: %(file)s <account.csv> [<account2.csv> ...]
@@ -40,8 +56,34 @@ def usage(exitcode = 0):
                        'doc': __doc__}
     sys.exit(exitcode)
 
+def process_date(element):
+    """Checks a date element and returns a properly formatted date if it's not
+    formatted so that GnuCash understands it.
+
+    DNB could either return dates on the format:
+
+        DD.MM.YY
+
+    but it could also return dates on the form:
+
+        "DD. mmm"
+
+    where 'mmm' could for instance be 'apr' or 'mai'. If this is the case, the
+    return string will be on the form 'DD.MM'. GnuCash could add the year
+    itself, or let the user specify it.
+    """
+    m = re.match('^"?(\d+)\. (\w+)"?$', element)
+    if m:
+        try:
+            return '%02d.%02d' % (int(m.group(1)), monthstr2num[m.group(2)])
+        except KeyError:
+            print "Unknown month name: '%s', please update code" % m.group(2)
+            raise
+    return m
+
 def process_line(line):
-    """Process a line in csv format and return it in the correct format.
+    """Process a line in CSV format and return it in the correct format. Some
+    modifications are needed.
     """
     # gnucash doesn't seem to like too much spaces:
     while line.find('  ') != -1:
@@ -56,7 +98,11 @@ def process_line(line):
 
     values = line.strip().split(';')
 
-    # the two last contains values, so commas should be replaced with points
+    # The first element contain the date, which must be checked:
+    values[0] = process_date(values[0])
+
+    # The two last elements contains money values. Commas should be replaced
+    # with points, as that's what GnuCash expect.
     values[-2] = values[-2].replace(',', '.')
     values[-1] = values[-1].replace(',', '.')
     out = u';'.join(values)
