@@ -81,6 +81,22 @@ def process_date(element):
             raise
     return m
 
+def process_value(element):
+    """Checks a money value and returns it properly formatted. DNB's values
+    comes in two kinds of format:
+
+         1999,99
+        1.999,99
+
+    This function returns them in the format of:
+
+        1999.99
+
+    as that's what GnuCash expects.
+
+    """
+    return element.replace('.', '').replace(',', '.')
+
 def process_line(line):
     """Process a line in CSV format and return it in the correct format. Some
     modifications are needed.
@@ -103,8 +119,8 @@ def process_line(line):
 
     # The two last elements contains money values. Commas should be replaced
     # with points, as that's what GnuCash expect.
-    values[-2] = values[-2].replace(',', '.')
-    values[-1] = values[-1].replace(',', '.')
+    values[-2] = process_value(values[-2])
+    values[-1] = process_value(values[-1])
     out = u';'.join(values)
     print out.encode('utf-8')
 
