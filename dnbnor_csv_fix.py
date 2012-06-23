@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- encoding:utf8 -*- #
 #
-# Copyright 2011 Joakim Hovlandsvåg <joakim.hovlandsvag@gmail.com>
+# Copyright 2011, 2012 Joakim Hovlandsvåg <joakim.hovlandsvag@gmail.com>
 #
 # This file is just a small script of mine.
 # 
@@ -16,26 +16,37 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with HomebaseTweaks. If not, see <http://www.gnu.org/licenses/>.
-"""
-Fixing DnbNOR's csv files, as they doesnt have the correct formatting to be read
-by GnuCash.
+"""Fixing DNB's CSV files, as they don't have the correct formatting to be read
+by GnuCash without errors. It takes the CSV files as arguments, and prints the
+washed format to stdout, so you could pipe to a proper file.
+
+Example:
+
+    dnb2csv.py maanedoversikt.april.txt > brukskonto.2012.04.txt
+
 """
 import sys
+import os
 
 def usage(exitcode = 0):
-    print """Usage: %s <account.csv> [<account2.csv> ...]
+    print """Usage: %(file)s <account.csv> [<account2.csv> ...]
+
+    %(doc)s
+
+    -h, --help      Show this and quit.
 
     Reads the csv files and prints it out to stdout, in a more readable format
-    for GnuCash."""
+    for GnuCash.""" % {'file': os.path.basename(sys.argv[0]),
+                       'doc': __doc__}
     sys.exit(exitcode)
 
 def process_line(line):
-    """Process a line in csv format and return it in the correct format."""
-    # gnucash doesn't seem to like too much spaces
-    # TODO: this looks ugly, but it works, for now
-    for i in range(20):
+    """Process a line in csv format and return it in the correct format.
+    """
+    # gnucash doesn't seem to like too much spaces:
+    while line.find('  ') != -1:
         line = line.replace('  ', ' ')
-    # remove weird characters
+    # remove weird characters:
     line = line.replace('\r', ' ')
     line = line.replace('\t', ' ')
     line = line.replace('\n', ' ')
@@ -65,6 +76,7 @@ def process_file(filename):
 def main(argv):
     if len(argv) <= 1:
         print "Need to specify what csv file(s) to fix."
+        usage(1)
         sys.exit(2)
     if '-h' in argv or '--help' in argv:
         usage()
