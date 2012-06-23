@@ -65,7 +65,7 @@ def process_line(line):
 def process_file(filename):
     f = open(filename, 'r')
     line = unicode(f.readline(), 'iso-8859-1')
-    if not line.startswith('Dato'):
+    if not any(line.startswith(s) for s in ('Dato', '"Dat')):
         # skipping the first line if it's the value names
         process_line(line)
     for line in f:
